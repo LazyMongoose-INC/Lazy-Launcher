@@ -50,7 +50,13 @@ class MainWindow(QMainWindow):
             nick=validate_nickname(self.nick.text())
             if not self.folder.text().strip(): raise ValueError("Сначала выберите папку сборки.")
             save_profile({"nickname":nick,"game_dir":self.folder.text().strip(),"java":self.java.text().strip(),"memory_mb":self.ram.value()})
-            inst=find_installation(self.folder.text().strip()); self.log("Найден Forge: "+inst.version_id); self.status.setText("Игра запускается…"); self.play.setEnabled(False)
+            inst=find_installation(self.folder.text().strip())
+            mods=inst.game_dir/"mods"
+            if not mods.is_dir() or not any(mods.rglob("*.jar")):
+                raise ValueError("В выбранной папке не найдены JAR-файлы модов (mods). Выберите именно папку вашей установленной сборки.")
+            self.log("Найден Forge: "+inst.version_id)
+            self.log("JAR модов: "+str(sum(1 for _ in mods.rglob("*.jar"))))
+            self.status.setText("Игра запускается…"); self.play.setEnabled(False)
             self.worker=Worker(self.folder.text().strip(),nick,self.java.text().strip(),self.ram.value())
             self.worker.output.connect(self.log); self.worker.error.connect(self.failed); self.worker.done.connect(self.finished); self.worker.start()
         except Exception as e: QMessageBox.critical(self,"Ошибка запуска",str(e))
