@@ -44,3 +44,6 @@ pyinstaller --noconfirm --windowed --name "Lazy Launcher" main.py
 ~~~
 
 Windows EXE следует собирать на Windows. Portable build с PyInstaller будет собираться в Windows CI.
+
+## CI
+Windows CI на ветке разработки запускает pytest и собирает portable ZIP как GitHub Actions artifact.
