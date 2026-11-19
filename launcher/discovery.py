@@ -1,6 +1,7 @@
 import json
 from dataclasses import dataclass
 from pathlib import Path
+TARGET_FORGE="14.23.5.2860"
 @dataclass(frozen=True)
 class ForgeInstallation:
     game_dir: Path
@@ -22,6 +23,8 @@ def find_installation(selected):
             try: data=json.loads(jf.read_text(encoding="utf-8-sig"))
             except (OSError,json.JSONDecodeError): continue
             identity=(folder.name+" "+str(data.get("inheritsFrom",""))+" "+str(data.get("id",""))).lower()
-            if "1.12.2" in identity and ("forge" in identity or "launchwrapper" in str(data.get("mainClass","")).lower()):
+            libs=" ".join(str(x.get("name","")) for x in data.get("libraries",[]))
+            forge_ok=TARGET_FORGE in identity or TARGET_FORGE in libs
+            if "1.12.2" in identity and forge_ok:
                 return ForgeInstallation(game,folder.name,jf,data)
-    raise ValueError("Forge для Minecraft 1.12.2 не найден. Нужна папка с versions/<forge>/<forge>.json.")
+    raise ValueError("Не найден профиль Minecraft 1.12.2 с Forge 14.23.5.2860. Выберите правильную папку экземпляра.")
