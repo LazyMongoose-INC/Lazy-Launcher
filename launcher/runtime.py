@@ -5,13 +5,20 @@ def find_java(explicit=""):
     candidates=[Path(explicit)] if explicit else []
     if os.environ.get("JAVA_HOME"):
         h=Path(os.environ["JAVA_HOME"]); candidates += [h/"bin"/"javaw.exe",h/"bin"/"java.exe"]
-    for n in ("javaw.exe","java.exe","javaw","java"):
+    for n in ("java.exe","javaw.exe","java","javaw"):
         p=shutil.which(n)
         if p: candidates.append(Path(p))
     for p in candidates:
         try:
             p=p.expanduser().resolve()
-            if p.is_file(): return p
+            if p.is_file():
+                probe = subprocess.run([str(p), "-version"], capture_output=True, text=True, timeout=8, check=False)
+                info = (probe.stdout + probe.stderr).lower()
+                if "1.8." not in info and '"8' not in info:
+                    raise ValueError("Для этой сборки требуется Java 8. Обнаружена другая версия Java.")
+                if "64-bit" not in info and "amd64" not in info and "x86_64" not in info:
+                    raise ValueError("Для этой сборки требуется 64-разрядная Java 8.")
+                return p
         except OSError: pass
     raise FileNotFoundError("Java не найдена. Укажите javaw.exe или установите Java 8 x64.")
 def _allowed(lib):
@@ -79,14 +86,17 @@ def build_command(inst,nickname,java,memory=4096):
     aid=asset.get("id","1.12"); assets=game/"assets"
     if not (assets/"indexes"/(aid+".json")).is_file(): raise FileNotFoundError("Не найден assets/indexes/"+aid+".json")
     repl={"$"+"{auth_player_name}":nick,"$"+"{version_name}":inst.version_id,"$"+"{game_directory}":str(game),"$"+"{assets_root}":str(assets),"$"+"{assets_index_name}":aid,"$"+"{auth_uuid}":offline_uuid(nick),"$"+"{auth_access_token}":"0","$"+"{user_type}":"legacy","$"+"{version_type}":"release","$"+"{user_properties}":"{}"}
-    raw=meta.get("minecraftArguments"); args=[]
+    raw=meta.get("minecraftArguments")
+    if not raw and client_json.is_file():
+        raw=json.loads(client_json.read_text(encoding="utf-8-sig")).get("minecraftArguments")
+    args=[]
     if isinstance(raw,str):
         for token in raw.split():
             for k,v in repl.items(): token=token.replace(k,v)
             args.append(token)
     if not args: raise ValueError("Forge JSON не содержит legacy minecraftArguments.")
     cp=os.pathsep.join([str(p.resolve()) for p in jars]+[str(client.resolve())])
-    cmd=[str(java),f"-Xms{min(1024,memory)}M",f"-Xmx{memory}M",f"-Djava.library.path={nd}","-Dminecraft.launcher.brand=LazyLauncher","-Dminecraft.launcher.version=0.1.0","-cp",cp,meta.get("mainClass","net.minecraft.launchwrapper.Launch"),*args]
+    cmd=[str(java),f"-Xms{min(1024,memory)}M",f"-Xmx{memory}M",f"-Djava.library.path={nd}","-Dminecraft.launcher.brand=LazyLauncher","-Dminecraft.launcher.version=0.1.0","-cp",cp,meta.get("mainClass") or (json.loads(client_json.read_text(encoding="utf-8-sig")).get("mainClass") if client_json.is_file() else None) or "net.minecraft.launchwrapper.Launch",*args]
     return cmd,game
 def run_process(command,cwd,write_line):
     p=subprocess.Popen(command,cwd=str(cwd),stdout=subprocess.PIPE,stderr=subprocess.STDOUT,stdin=subprocess.DEVNULL,text=True,encoding="utf-8",errors="replace",shell=False,creationflags=getattr(subprocess,"CREATE_NO_WINDOW",0))
