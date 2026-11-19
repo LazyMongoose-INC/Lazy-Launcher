@@ -1,4 +1,4 @@
-import hashlib,json,re
+import hashlib,json,re,uuid
 from pathlib import Path
 NICK=re.compile(r"^[A-Za-z0-9_]{3,16}$")
 def validate_nickname(value):
@@ -6,8 +6,10 @@ def validate_nickname(value):
     if not NICK.fullmatch(value): raise ValueError("Ник: 3–16 латинских букв, цифр или _.")
     return value
 def offline_uuid(nick):
-    h=hashlib.md5(("OfflinePlayer:"+validate_nickname(nick)).encode()).hexdigest()
-    return f"{h[:8]}-{h[8:12]}-{h[12:16]}-{h[16:20]}-{h[20:]}"
+    raw=bytearray(hashlib.md5(("OfflinePlayer:"+validate_nickname(nick)).encode()).digest())
+    raw[6]=(raw[6]&0x0f)|0x30
+    raw[8]=(raw[8]&0x3f)|0x80
+    return str(uuid.UUID(bytes=bytes(raw)))
 def profile_path():
     p=Path.home()/"AppData"/"Roaming"/"LazyLauncher"
     if not p.parent.exists(): p=Path.home()/".config"/"LazyLauncher"
