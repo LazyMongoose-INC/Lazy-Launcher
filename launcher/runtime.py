@@ -87,8 +87,8 @@ def build_command(inst,nickname,java,memory=4096):
     if not (assets/"indexes"/(aid+".json")).is_file(): raise FileNotFoundError("Не найден assets/indexes/"+aid+".json")
     repl={"$"+"{auth_player_name}":nick,"$"+"{version_name}":inst.version_id,"$"+"{game_directory}":str(game),"$"+"{assets_root}":str(assets),"$"+"{assets_index_name}":aid,"$"+"{auth_uuid}":offline_uuid(nick),"$"+"{auth_access_token}":"0","$"+"{user_type}":"legacy","$"+"{version_type}":"release","$"+"{user_properties}":"{}"}
     raw=meta.get("minecraftArguments")
-    if not raw and client_json.is_file():
-        raw=json.loads(client_json.read_text(encoding="utf-8-sig")).get("minecraftArguments")
+    if not raw and cj.is_file():
+        raw=json.loads(cj.read_text(encoding="utf-8-sig")).get("minecraftArguments")
     args=[]
     if isinstance(raw,str):
         for token in raw.split():
@@ -96,7 +96,7 @@ def build_command(inst,nickname,java,memory=4096):
             args.append(token)
     if not args: raise ValueError("Forge JSON не содержит legacy minecraftArguments.")
     cp=os.pathsep.join([str(p.resolve()) for p in jars]+[str(client.resolve())])
-    cmd=[str(java),f"-Xms{min(1024,memory)}M",f"-Xmx{memory}M",f"-Djava.library.path={nd}","-Dminecraft.launcher.brand=LazyLauncher","-Dminecraft.launcher.version=0.1.0","-cp",cp,meta.get("mainClass") or (json.loads(client_json.read_text(encoding="utf-8-sig")).get("mainClass") if client_json.is_file() else None) or "net.minecraft.launchwrapper.Launch",*args]
+    cmd=[str(java),f"-Xms{min(1024,memory)}M",f"-Xmx{memory}M",f"-Djava.library.path={nd}","-Dminecraft.launcher.brand=LazyLauncher","-Dminecraft.launcher.version=0.1.0","-cp",cp,meta.get("mainClass") or (json.loads(cj.read_text(encoding="utf-8-sig")).get("mainClass") if cj.is_file() else None) or "net.minecraft.launchwrapper.Launch",*args]
     return cmd,game
 def run_process(command,cwd,write_line):
     p=subprocess.Popen(command,cwd=str(cwd),stdout=subprocess.PIPE,stderr=subprocess.STDOUT,stdin=subprocess.DEVNULL,text=True,encoding="utf-8",errors="replace",shell=False,creationflags=getattr(subprocess,"CREATE_NO_WINDOW",0))
