@@ -7,7 +7,7 @@
 **Установка, запуск и обслуживание сборки Minecraft — в одном приложении.**
 
 <p>
-  <a href="README_EN.md">English</a> · <strong>Русский</strong>
+  <strong>Русский</strong> · <a href="README_EN.md">English (дополнительно)</a>
 </p>
 
 <p>
