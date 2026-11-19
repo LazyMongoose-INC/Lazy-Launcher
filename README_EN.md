@@ -31,11 +31,10 @@
 
 **Lazy Launcher** is a dedicated Windows launcher being developed to install and run the custom **LazyMongoose Modpack** for Minecraft Java Edition 1.12.2.
 
-The user experience takes inspiration from familiar Minecraft launchers, including Legacy Launcher: a clear home screen, player profile, game version management, component setup, and a straightforward launch flow.
+The user experience is designed around a clear home screen, player profile, game version management, component setup, and a straightforward launch flow.
 
 The goal is to do more than start Minecraft. The launcher is intended to prepare and maintain the complete modpack environment: Minecraft, Forge, Java, mods, configuration files, and additional resources.
 
-> This is an independent project. Lazy Launcher is not a fork of Legacy Launcher and does not use its code or branding.
 
 ## Planned features
 
