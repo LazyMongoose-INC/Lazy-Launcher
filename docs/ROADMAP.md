@@ -5,7 +5,8 @@
 - [x] Document baseline audit
 - [x] Propose architecture and stack
 - [x] Identify blockers and risks
-- [ ] Review architecture document and approve scope before broad implementation
+- [x] Document system-Java-first selection and managed-runtime fallback
+- [ ] Review and approve architecture scope before broad implementation
 
 ## Phase 2 — Application Skeleton
 - [ ] Create package structure and application entry point
@@ -25,7 +26,9 @@
 ## Phase 4 — Minecraft Runtime
 - [ ] Version metadata handling for 1.12.2
 - [ ] Libraries/assets/natives resolver
-- [ ] Java 8 discovery and managed runtime
+- [ ] System Java discovery and compatibility validation (Java 8 x64 target, subject to pack verification)
+- [ ] Managed Java 8 x64 fallback download, integrity verification, and repair
+- [ ] Runtime selection settings and diagnostics
 - [ ] Launch argument builder
 - [ ] Real vanilla 1.12.2 smoke test
 
@@ -70,4 +73,7 @@
 - [ ] GitHub Release
 
 ## Completion policy
+
 A phase is marked complete only after its implementation and tests are recorded. A CI-only launch simulation does not count as a real Minecraft launch test.
+
+No application implementation is included in this architecture-documentation update. Phase 2 must begin only after the architecture is reviewed and explicitly approved.
