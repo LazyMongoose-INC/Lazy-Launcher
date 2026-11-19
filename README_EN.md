@@ -45,7 +45,7 @@ The following is the target feature set. Features will be implemented incrementa
 |---|---|
 | Modpack installation | Download and prepare Minecraft 1.12.2 and modpack files |
 | Forge | Install and configure the compatible Forge version |
-| Java Runtime | Managed 64-bit Java 8 without changing the system Java |
+| Java Runtime | Compatible system Java 8 x64 first; managed Java is installed only when needed |
 | Player profile | Local player profile with an offline-mode nickname |
 | Game launch | Resolve launch arguments and start Minecraft from the launcher |
 | Updates | Check the modpack version and download changed files only |
