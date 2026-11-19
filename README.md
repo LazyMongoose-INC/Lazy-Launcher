@@ -1,16 +1,141 @@
+<div align="center">
+
 # Lazy Launcher
 
-Windows launcher for the LazyMongoose Modpack (Minecraft Java 1.12.2).
+### Лаунчер для LazyMongoose Modpack · Minecraft Java Edition 1.12.2
 
-> Development is currently in Phase 1 (audit and architecture). No launcher implementation or modpack files are present yet.
+**Установка, запуск и обслуживание сборки Minecraft — в одном приложении.**
 
-## Project documents
-- [Repository audit](docs/PROJECT_AUDIT.md)
-- [Architecture proposal](docs/ARCHITECTURE.md)
-- [Roadmap](docs/ROADMAP.md)
+<p>
+  <strong>Русский</strong> · <a href="README_EN.md">English (дополнительно)</a>
+</p>
 
-## Target
-Install and launch the complete LazyMongoose Modpack 1.12.2 with a local offline nickname profile, managed Java runtime, Forge, mod/config/resource files, update/repair support, and diagnostics.
+<p>
+  <a href="https://github.com/LazyMongoose-INC/Lazy-Launcher"><img src="https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github" alt="GitHub repository"></a>
+  <a href="https://github.com/LazyMongoose-INC/Lazy-Launcher/releases"><img src="https://img.shields.io/badge/Скачать-Релизы-2ea44f?style=for-the-badge&logo=windows" alt="Releases"></a>
+  <a href="docs/ROADMAP.md"><img src="https://img.shields.io/badge/План-разработки-59636e?style=for-the-badge" alt="Roadmap"></a>
+</p>
 
-## Status
-Architecture documents are being prepared on a development branch. No release is available.
+<p>
+  <img src="https://img.shields.io/badge/Статус-Ранняя%20разработка-orange?style=flat-square" alt="Early development">
+  <img src="https://img.shields.io/badge/Платформа-Windows-0078D4?style=flat-square&logo=windows" alt="Windows">
+  <img src="https://img.shields.io/badge/Minecraft-1.12.2-62B47A?style=flat-square" alt="Minecraft 1.12.2">
+  <img src="https://img.shields.io/badge/Forge-Планируется-orange?style=flat-square" alt="Forge planned">
+</p>
+
+</div>
+
+---
+
+## О проекте
+
+**Lazy Launcher** — отдельный Windows-лаунчер, создаваемый для установки и запуска авторской сборки **LazyMongoose Modpack** на Minecraft Java Edition 1.12.2.
+
+Ориентир по пользовательскому опыту — привычные игровые лаунчеры: понятный главный экран, профиль игрока, управление игровой версией, установка необходимых компонентов и запуск в несколько действий.
+
+Задача проекта — не просто запускать Minecraft, а автоматически подготовить и поддерживать всю сборку: Minecraft, Forge, Java, моды, конфигурации и дополнительные ресурсы.
+
+## Возможности
+
+Ниже — целевой функционал. Он будет добавляться по мере разработки; на текущем этапе приложение ещё не выпущено.
+
+| Возможность | Что планируется |
+|---|---|
+| Установка сборки | Автоматическая загрузка и подготовка Minecraft 1.12.2 и файлов модпака |
+| Forge | Установка и настройка совместимой версии Forge |
+| Java Runtime | Сначала совместимая системная Java 8 x64; собственная Java устанавливается только при необходимости |
+| Профиль игрока | Локальный профиль с игровым никнеймом для offline-режима |
+| Запуск игры | Подготовка аргументов запуска и запуск Minecraft из лаунчера |
+| Обновление | Проверка версии сборки и загрузка только изменившихся файлов |
+| Проверка файлов | Контроль размера и SHA-256, обнаружение повреждённых файлов |
+| Восстановление | Повторная загрузка отсутствующих или повреждённых файлов |
+| Сохранения | Защита миров и пользовательских данных при обновлении |
+| Диагностика | Логи лаунчера и игры, понятные сообщения об ошибках |
+
+### Интерфейс и удобство
+
+Планируется лаконичный интерфейс в духе современных Minecraft-лаунчеров:
+
+- главный экран с выбранной сборкой и кнопкой запуска;
+- отображение статуса установки, обновления и проверки файлов;
+- управление игровым никнеймом и настройками;
+- выбор папки установки;
+- просмотр логов и сведений об ошибках;
+- загрузка компонентов в фоне без зависания интерфейса.
+
+## Технологии
+
+| Компонент | Планируемая технология |
+|---|---|
+| Язык | Python 3.12 |
+| Интерфейс | PySide6 / Qt Widgets |
+| Сеть и загрузки | HTTP(S), потоковая загрузка, повторные попытки |
+| Целостность файлов | SHA-256 |
+| Настройки и профили | JSON с проверкой данных |
+| Тестирование | pytest |
+| Сборка Windows | PyInstaller; установщик будет выбран на этапе релиза |
+| CI | GitHub Actions |
+
+Технические решения уточняются в архитектурной документации и могут быть скорректированы после проверки совместимости с реальной сборкой.
+
+## Состояние разработки
+
+<details>
+<summary><strong>Этапы проекта</strong></summary>
+
+| Этап | Содержание | Статус |
+|---|---|---|
+| 1 | Аудит репозитория и архитектура | Документация подготовлена |
+| 2 | Каркас приложения и интерфейс | Не начат |
+| 3 | Загрузчик, manifest и проверка файлов | Не начат |
+| 4 | Minecraft Runtime и Java | Не начат |
+| 5 | Интеграция Forge 1.12.2 | Не начат |
+| 6 | Интеграция LazyMongoose Modpack | Ожидаются файлы сборки |
+| 7 | Локальные профили и offline-режим | Не начат |
+| 8 | Обновления и восстановление | Не начат |
+| 9 | Тестирование и стабилизация | Не начат |
+| 10 | Windows-сборка и релиз | Не начат |
+
+</details>
+
+**Сейчас:** идёт подготовка проекта и архитектуры. Готового EXE, установщика и публичного релиза пока нет. Версия Forge и состав модпака должны быть подтверждены по исходным файлам сборки.
+
+## Документация
+
+- [Аудит репозитория](docs/PROJECT_AUDIT.md)
+- [Архитектура приложения](docs/ARCHITECTURE.md)
+- [План разработки](docs/ROADMAP.md)
+
+## Установка
+
+Публичная сборка пока недоступна. Когда появится проверенный релиз, его можно будет скачать на странице [Releases](https://github.com/LazyMongoose-INC/Lazy-Launcher/releases).
+
+Не скачивайте исполняемые файлы из неизвестных источников и не считайте исходный код готовым лаунчером до появления релиза.
+
+## Важные примечания
+
+- Offline-профиль означает локальный никнейм без входа в Microsoft. Он не заменяет лицензионную авторизацию и не позволит подключаться к серверам, требующим online-mode-аутентификацию.
+- Моды и другие сторонние файлы будут распространяться только при наличии соответствующих разрешений и с учётом их лицензий.
+- Обновления не должны удалять пользовательские миры и другие неуправляемые файлы.
+- Совместимость Java и Forge будет проверяться на реальной сборке, а не только по результатам автоматических тестов.
+
+## Участие и обратная связь
+
+Нашли ошибку или хотите предложить улучшение?
+
+<p>
+  <a href="https://github.com/LazyMongoose-INC/Lazy-Launcher/issues"><img src="https://img.shields.io/badge/Сообщить%20об%20ошибке-Issues-d73a4a?style=for-the-badge&logo=github" alt="Issues"></a>
+  <a href="https://github.com/LazyMongoose-INC/Lazy-Launcher/pulls"><img src="https://img.shields.io/badge/Предложить%20изменение-Pull%20Requests-8957e5?style=for-the-badge&logo=github" alt="Pull requests"></a>
+</p>
+
+Перед созданием issue проверьте, не описана ли проблема ранее. Для отчёта об ошибке по возможности приложите версию Windows, шаги воспроизведения и соответствующий лог.
+
+---
+
+<div align="center">
+
+**Lazy Launcher** · Проект LazyMongoose
+
+[Репозиторий](https://github.com/LazyMongoose-INC/Lazy-Launcher) · [Релизы](https://github.com/LazyMongoose-INC/Lazy-Launcher/releases) · [План разработки](docs/ROADMAP.md)
+
+</div>

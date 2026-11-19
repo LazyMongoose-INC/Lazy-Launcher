@@ -1,25 +1,29 @@
-# Repository Audit — Lazy Launcher
+# Аудит репозитория — Lazy Launcher
 
-Audit date: 2026-11-19
+Дата аудита: 19 ноября 2026 года
 
-## Repository state
-- Repository: `LazyMongoose-INC/Lazy-Launcher` (public)
-- Default branch: `main`
-- Initial commit: `f347b4919dce4f257fdd11265e6baed6c727b312`
-- Main contains one file: `README.md` (44 bytes)
-- Branches: main only at audit start
-- Releases, tags, issues, pull requests: none found during audit
-- Application code, build configuration, tests, CI, modpack files: absent
+## Состояние репозитория на момент аудита
 
-## Findings
-There is no existing application or architecture to preserve. The project can start with a clean modular design, but real modpack inputs are currently missing and must be supplied or made available through a rights-compatible distribution method.
+- Репозиторий: `LazyMongoose-INC/Lazy-Launcher` (публичный)
+- Ветка по умолчанию: `main`
+- Начальный коммит: `f347b4919dce4f257fdd11265e6baed6c727b312`
+- На момент первоначального аудита в `main` находился один файл: `README.md` (44 байта)
+- На момент аудита существовала только ветка `main`
+- Релизы, теги, issues и pull requests на момент аудита не обнаружены
+- Исходный код приложения, конфигурация сборки, тесты, CI и файлы модпака отсутствовали
 
-## Initial blockers / questions resolved by repository inspection
-1. Modpack source files and inventory are not present.
-2. Exact Forge build is not specified yet; it must be derived from the modpack's existing files/inventory.
-3. No launcher artwork/branding assets are committed.
-4. Offline-mode username support must not be presented as Microsoft authentication; servers enforcing online authentication will reject it.
-5. CI cannot prove a real Windows game launch; that requires a Windows test machine and complete pack files.
+## Результаты
 
-## Audit scope limitations
-GitHub connector inspection covered repository metadata, default-branch tree, README, branches, latest commit, releases, and issues. No local checkout, Windows environment, filesystem, or runtime execution was available during this audit.
+На момент аудита в репозитории не было готового приложения или архитектуры, которую требовалось бы сохранить. Проект можно строить на модульной архитектуре с нуля. При этом реальные исходные файлы модпака отсутствуют: их необходимо предоставить либо организовать распространение способом, соответствующим лицензиям и разрешениям правообладателей.
+
+## Первоначальные блокирующие вопросы
+
+1. Исходные файлы и перечень компонентов модпака в репозитории отсутствуют.
+2. Точная сборка Forge пока не определена. Её необходимо установить по существующим файлам и составу модпака.
+3. Графические материалы и фирменные ресурсы лаунчера ещё не добавлены.
+4. Локальный offline-профиль с никнеймом нельзя представлять как авторизацию Microsoft. Серверы с обязательной online-mode-аутентификацией не примут такой профиль.
+5. CI не может подтвердить полноценный запуск Minecraft в реальной Windows-среде. Для этого нужны тестовая Windows-машина и полные файлы сборки.
+
+## Ограничения аудита
+
+При проверке через GitHub были изучены метаданные репозитория, дерево файлов ветки по умолчанию, README, ветки, последний коммит, релизы и issues. Локальная копия репозитория, Windows-среда, файловая система и запуск приложения в рамках аудита не использовались.

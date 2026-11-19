@@ -1,73 +1,79 @@
-# Development Roadmap
+# План разработки Lazy Launcher
 
-## Phase 1 — Audit and Architecture
-- [x] Inspect repository metadata, files, branches, history, releases and issues
-- [x] Document baseline audit
-- [x] Propose architecture and stack
-- [x] Identify blockers and risks
-- [ ] Review architecture document and approve scope before broad implementation
+## Этап 1 — Аудит и архитектура
+- [x] Проверить метаданные репозитория, файлы, ветки, историю, релизы и issues
+- [x] Подготовить документ с результатами аудита
+- [x] Предложить архитектуру и технологический стек
+- [x] Зафиксировать блокирующие вопросы и риски
+- [x] Описать приоритет системной Java и резервную установку собственной
+- [ ] Рассмотреть и утвердить архитектуру до начала основной реализации
 
-## Phase 2 — Application Skeleton
-- [ ] Create package structure and application entry point
-- [ ] PySide6 main window and theme
-- [ ] Validated settings and local profile persistence
-- [ ] Logging and diagnostics
-- [ ] Unit tests and CI baseline
+## Этап 2 — Каркас приложения
+- [ ] Создать структуру пакетов и точку входа приложения
+- [ ] Реализовать главное окно PySide6 и тему оформления
+- [ ] Добавить проверяемое хранение настроек и локальных профилей
+- [ ] Настроить логирование и диагностику
+- [ ] Добавить модульные тесты и базовый CI
 
-## Phase 3 — Download/Manifest
-- [ ] Manifest schema/version validation
-- [ ] HTTP streaming, timeouts, progress, retry/backoff
-- [ ] Resume support where safe
-- [ ] SHA-256/size verification
-- [ ] Safe destination paths
-- [ ] Test coverage
+## Этап 3 — Загрузчик и manifest
+- [ ] Проверка схемы и версии manifest
+- [ ] Потоковая HTTP-загрузка, тайм-ауты, прогресс и повторные попытки с backoff
+- [ ] Безопасное продолжение загрузки, если оно поддерживается
+- [ ] Проверка размера и SHA-256
+- [ ] Безопасная обработка путей назначения
+- [ ] Покрытие тестами
 
-## Phase 4 — Minecraft Runtime
-- [ ] Version metadata handling for 1.12.2
-- [ ] Libraries/assets/natives resolver
-- [ ] Java 8 discovery and managed runtime
-- [ ] Launch argument builder
-- [ ] Real vanilla 1.12.2 smoke test
+## Этап 4 — Среда Minecraft
+- [ ] Обработка метаданных версии 1.12.2
+- [ ] Поиск библиотек, assets и natives
+- [ ] Поиск системной Java и проверка совместимости (цель — Java 8 x64, до подтверждения на модпаке)
+- [ ] Резервная загрузка собственной Java 8 x64, проверка целостности и восстановление
+- [ ] Настройки выбора Runtime и отображение диагностики
+- [ ] Формирование аргументов запуска
+- [ ] Реальная проверка запуска чистой Minecraft 1.12.2
 
-## Phase 5 — Forge
-- [ ] Identify exact Forge build from pack input
-- [ ] Install/resolve Forge client files
-- [ ] Forge launch metadata and classpath
-- [ ] Real Forge launch smoke test
+## Этап 5 — Forge
+- [ ] Определить точную сборку Forge по исходным файлам модпака
+- [ ] Установить или разрешить необходимые файлы Forge
+- [ ] Реализовать метаданные запуска и classpath Forge
+- [ ] Проверить реальный запуск Forge
 
-## Phase 6 — Modpack Integration
-- [ ] Obtain legally distributable pack files or user-provided source
-- [ ] Inventory and dependency review
-- [ ] Build versioned manifest
-- [ ] Install mods/configs/resources
-- [ ] Verify complete pack startup and mod loading
+## Этап 6 — Интеграция модпака
+- [ ] Получить файлы модпака, разрешённые к распространению, или пользовательский источник
+- [ ] Составить перечень компонентов и проверить зависимости
+- [ ] Подготовить версионируемый manifest
+- [ ] Установить моды, конфигурации и ресурсы
+- [ ] Проверить полный запуск сборки и загрузку модов
 
-## Phase 7 — Offline Profiles and Networking
-- [ ] Nickname validation and persistence
-- [ ] Offline UUID handling
-- [ ] Singleplayer and LAN validation
-- [ ] Server IP/port helper
-- [ ] Clearly communicate online-auth server limitation
+## Этап 7 — Offline-профили и сеть
+- [ ] Проверка и сохранение никнейма
+- [ ] Работа с offline UUID
+- [ ] Проверка одиночной игры и LAN
+- [ ] Помощник для IP/порта сервера
+- [ ] Ясное предупреждение об ограничениях серверов с online-аутентификацией
 
-## Phase 8 — Updates
-- [ ] Pack manifest/version check
-- [ ] Incremental file updates
-- [ ] Staging, rollback and repair
-- [ ] Preserve worlds and user files
+## Этап 8 — Обновления
+- [ ] Проверка версии сборки по manifest
+- [ ] Инкрементальное обновление файлов
+- [ ] Подготовка обновления, откат и восстановление
+- [ ] Сохранение миров и пользовательских файлов
 
-## Phase 9 — Stabilization
-- [ ] Unit and integration test expansion
-- [ ] Windows smoke tests
-- [ ] Crash/error diagnostics
-- [ ] Performance and UX checks
+## Этап 9 — Стабилизация
+- [ ] Расширить набор модульных и интеграционных тестов
+- [ ] Провести проверки в Windows
+- [ ] Улучшить диагностику сбоев и ошибок
+- [ ] Проверить производительность и удобство интерфейса
 
-## Phase 10 — Release
-- [ ] Windows build
-- [ ] Installer, shortcuts and uninstall
-- [ ] Clean Windows install verification
-- [ ] Full pack launch verification
-- [ ] Documentation and changelog
-- [ ] GitHub Release
+## Этап 10 — Релиз
+- [ ] Подготовить Windows-сборку
+- [ ] Создать установщик, ярлыки и деинсталлятор
+- [ ] Проверить установку на чистой Windows
+- [ ] Проверить полный запуск модпака
+- [ ] Подготовить документацию и журнал изменений
+- [ ] Опубликовать GitHub Release
 
-## Completion policy
-A phase is marked complete only after its implementation and tests are recorded. A CI-only launch simulation does not count as a real Minecraft launch test.
+## Правило завершения этапов
+
+Этап отмечается выполненным только после реализации и фиксации результатов тестирования. Имитация запуска в CI не считается проверкой реального запуска Minecraft.
+
+В рамках обновления архитектурной документации код приложения не создаётся. Этап 2 начинается только после рассмотрения архитектуры и отдельного явного согласования.
