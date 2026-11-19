@@ -1,168 +1,168 @@
-# Lazy Launcher — Architecture
+# Lazy Launcher — архитектура проекта
 
-## 1. Project goals
+## 1. Цели проекта
 
-Build a maintainable Windows launcher for LazyMongoose Modpack on Minecraft Java Edition 1.12.2. The launcher should install, verify, repair, update, and start the complete game instance; provide local offline nickname profiles; preserve user data; and expose useful diagnostics through a clear desktop interface.
+Создать поддерживаемый Windows-лаунчер для LazyMongoose Modpack на Minecraft Java Edition 1.12.2. Лаунчер должен устанавливать, проверять, восстанавливать, обновлять и запускать игровой экземпляр; поддерживать локальные профили с никнеймом; сохранять пользовательские данные; предоставлять понятную диагностику через удобный интерфейс.
 
-The user experience may take inspiration from established Minecraft launchers, including Legacy Launcher. This is a UX reference only: Lazy Launcher remains an independent implementation and must not copy third-party source code, assets, trademarks, or proprietary design elements.
+В качестве ориентира пользовательского опыта можно использовать привычные игровые лаунчеры, включая Legacy Launcher. Это только ориентир по UX: Lazy Launcher — самостоятельный проект. Запрещено копировать сторонний исходный код, графические материалы, товарные знаки или защищённое фирменное оформление.
 
-## 2. Proposed technology stack
+## 2. Предлагаемый технологический стек
 
-- Python 3.12 for launcher logic. Pin the exact interpreter and dependencies after compatibility checks.
-- PySide6 / Qt Widgets for the Windows desktop interface.
-- One centralized HTTP client (Requests or the standard library); select one during implementation. It must support streaming, timeouts, retries, and controlled redirects.
-- Validated JSON for settings and local profiles. Introduce SQLite only if real requirements exceed simple configuration persistence.
-- pytest for unit and integration tests.
-- GitHub Actions, including Windows runners, for automated checks.
-- PyInstaller for the initial Windows executable; choose and validate the installer technology during the release phase.
+- Python 3.12 — логика лаунчера. Точные версии интерпретатора и зависимостей будут зафиксированы после проверки совместимости.
+- PySide6 / Qt Widgets — графический интерфейс Windows.
+- Единый HTTP-клиент (Requests или стандартная библиотека Python; окончательный выбор будет сделан при реализации). Он должен поддерживать потоковую загрузку, тайм-ауты, повторные попытки и контролируемые перенаправления.
+- JSON с проверкой структуры — настройки и локальные профили. SQLite следует добавлять только при появлении реальной необходимости.
+- pytest — модульные и интеграционные тесты.
+- GitHub Actions, включая Windows runners, — автоматические проверки.
+- PyInstaller — первоначальная сборка Windows-приложения. Технологию установщика выбрать и проверить на этапе подготовки релиза.
 
-## 3. High-level module boundaries
+## 3. Границы основных модулей
 
-- `ui/`: windows, views, widgets, visual state, and user interaction. No network, installation, or process-management logic.
-- `core/config/`: settings schema, validation, migration, and profile persistence.
-- `core/installer/`: install orchestration, manifest validation, progress, repair, and install state.
-- `core/downloads/`: HTTP transport, queues, progress events, retries, safe resume, and integrity checks.
-- `core/minecraft/`: version metadata, libraries, assets, natives, classpath, and argument resolution.
-- `core/forge/`: Forge-specific metadata and launch integration for the exact selected 1.12.2 build.
-- `core/java/`: system Java discovery, compatibility checks, managed-runtime fallback, and runtime selection.
-- `core/pack/`: LazyMongoose manifest, pack version, and file ownership policy.
-- `core/updates/`: launcher and pack update checks, staging, activation, and rollback.
-- `core/logging/`: rotating launcher logs, game output capture, and diagnostic export.
-- `tests/`: unit, integration, and Windows smoke tests.
+- `ui/` — окна, представления, виджеты, визуальное состояние и взаимодействие с пользователем. Здесь не должно быть логики сети, установки или управления процессами.
+- `core/config/` — схема настроек, проверка данных, миграции и хранение профилей.
+- `core/installer/` — управление установкой, проверка manifest, прогресс, восстановление и состояние установки.
+- `core/downloads/` — HTTP-транспорт, очереди, события прогресса, повторные попытки, безопасное продолжение загрузки и проверка целостности.
+- `core/minecraft/` — метаданные версий, библиотеки, assets, natives, classpath и подготовка аргументов запуска.
+- `core/forge/` — метаданные Forge и интеграция запуска для конкретной выбранной сборки 1.12.2.
+- `core/java/` — поиск системной Java, проверка совместимости, резервная установка собственной Java и выбор Runtime.
+- `core/pack/` — manifest LazyMongoose, версия сборки и правила принадлежности файлов.
+- `core/updates/` — проверка обновлений лаунчера и сборки, подготовка обновления, активация и откат.
+- `core/logging/` — ротация логов лаунчера, сбор вывода игры и экспорт диагностики.
+- `tests/` — модульные, интеграционные тесты и проверки запуска в Windows.
 
-Keep the UI responsive: network, disk-intensive, and process operations run outside the UI thread and report progress through Qt signals or an equivalent event boundary.
+Интерфейс не должен зависать: сетевые операции, работа с диском и управление процессами выполняются вне UI-потока. Прогресс передаётся через сигналы Qt или эквивалентный механизм событий.
 
-## 4. Java runtime policy
+## 4. Политика Java Runtime
 
-### 4.1 Priority: compatible system Java first
+### 4.1. Приоритет — системная Java
 
-The default policy is **System Java first; managed Java only when needed**. The launcher must not download or bundle a private runtime unconditionally.
+По умолчанию используется стратегия **«сначала системная Java, собственная — только при необходимости»**. Лаунчер не должен безусловно скачивать или включать в комплект отдельную Java.
 
-For the Minecraft 1.12.2 / Forge target, Java 8 x64 is the expected baseline, but the final compatibility requirement must be confirmed against the actual modpack and exact Forge build.
+Для Minecraft 1.12.2 и целевой сборки Forge ожидаемая базовая конфигурация — Java 8 x64. Окончательное требование необходимо подтвердить на реальном модпаке и точной версии Forge.
 
-At launch time, the runtime resolver should use this order:
+При запуске Runtime Resolver должен использовать следующий порядок:
 
-1. A Java executable explicitly selected by the user in launcher settings, if it passes compatibility checks.
-2. A compatible system Java 8 x64 discovered on Windows. Discovery should consider supported sources such as `JAVA_HOME`, the executable available on `PATH`, and standard Windows Java installation registrations/locations. Discovery must not execute arbitrary files found by an unrestricted filesystem scan.
-3. A previously installed Lazy Launcher-managed Java runtime, if it is valid and compatible.
-4. If no usable runtime is found, offer or automatically initiate installation of the managed Java runtime according to the user's installation settings.
+1. Java, путь к которой пользователь явно указал в настройках лаунчера, если она прошла проверку совместимости.
+2. Совместимая системная Java 8 x64, найденная в Windows. Проверять поддерживаемые источники: `JAVA_HOME`, исполняемый файл из `PATH`, стандартные записи и каталоги установки Java в Windows. Запрещено запускать произвольные файлы, найденные полным сканированием дисков.
+3. Ранее установленная собственная Java Lazy Launcher, если она исправна и совместима.
+4. Если подходящий Runtime не найден — предложить или автоматически начать установку собственной Java в соответствии с настройками пользователя.
 
-A newer system Java must not be assumed compatible merely because it is installed. The resolver must inspect the actual executable, vendor/version output, and architecture, then apply the compatibility policy for the selected Minecraft/Forge instance.
+Нельзя считать новую версию Java совместимой только потому, что она установлена в системе. Необходимо проверить конкретный исполняемый файл, версию, поставщика и разрядность, а затем применить правила совместимости выбранного игрового экземпляра.
 
-### 4.2 Compatibility validation
+### 4.2. Проверка совместимости
 
-Before selecting a runtime, validate at least:
+Перед выбором Runtime необходимо проверить как минимум:
 
-- executable exists and can be started for a version probe;
-- Java major version is supported by the selected instance;
-- runtime architecture is 64-bit for the target pack;
-- executable is not a broken link or unusable installation;
-- the version probe completes within a timeout and its output can be parsed.
+- наличие исполняемого файла и возможность запустить проверку версии;
+- соответствие основной версии Java требованиям выбранного игрового экземпляра;
+- разрядность 64 бита для целевой сборки;
+- отсутствие битой ссылки или неисправной установки;
+- завершение проверки версии в пределах тайм-аута и возможность разобрать её результат.
 
-The compatibility policy must be instance-aware rather than hard-coded globally. If the actual modpack proves to require a different Java build or vendor, record that requirement in pack metadata and tests.
+Правила совместимости должны учитывать конкретный игровой экземпляр, а не быть одним глобальным условием для всех сборок. Если реальный модпак потребует конкретную сборку или поставщика Java, это требование нужно зафиксировать в метаданных модпака и тестах.
 
-### 4.3 Managed Java fallback
+### 4.3. Резервная установка собственной Java
 
-When no compatible system runtime is available:
+Если совместимая системная Java отсутствует:
 
-- download a supported 64-bit Java 8 runtime from a documented, trusted distribution source;
-- verify the download using a pinned checksum or a trusted vendor-provided integrity mechanism;
-- install it in a launcher-managed runtime directory, separate from Windows system locations and game saves;
-- keep the runtime associated with the relevant game instance or runtime identifier;
-- support re-verification and repair if files are missing or corrupted;
-- never modify `JAVA_HOME`, the system `PATH`, registry settings, or an existing system Java installation.
+- скачать поддерживаемую 64-битную Java 8 из документированного доверенного источника;
+- проверить загрузку по заранее заданной контрольной сумме или надёжному механизму проверки поставщика;
+- установить Runtime в отдельный каталог, управляемый лаунчером, не затрагивая системные каталоги Windows и игровые сохранения;
+- связать Runtime с соответствующим игровым экземпляром или идентификатором Runtime;
+- поддерживать повторную проверку и восстановление отсутствующих или повреждённых файлов;
+- не изменять `JAVA_HOME`, системный `PATH`, настройки реестра или существующую системную Java.
 
-The launcher must clearly show whether it selected system Java or its managed runtime, and provide the resolved executable path and version in diagnostics.
+В интерфейсе и диагностике должно быть понятно, какая Java выбрана — системная или установленная лаунчером. Необходимо показывать путь к исполняемому файлу и версию.
 
-### 4.4 Settings and failure behavior
+### 4.4. Настройки и обработка ошибок
 
-Provide an automatic mode as the default. Where useful, expose an advanced option to select a Java executable or choose a managed runtime. Do not make users configure Java manually for a normal first launch.
+Режим «Автоматически» должен быть режимом по умолчанию. В дополнительных настройках можно предусмотреть ручной выбор исполняемого файла Java или собственной версии Runtime. Для обычного первого запуска пользователь не должен вручную настраивать Java.
 
-If a selected custom Java is incompatible, explain why and offer the next valid option. Do not silently switch runtimes after a launch failure without recording the reason. A user must be able to see and change the selected runtime.
+Если выбранная пользователем Java несовместима, лаунчер должен объяснить причину и предложить следующий подходящий вариант. Нельзя молча менять Runtime после ошибки запуска — причина переключения должна попасть в лог. Пользователь должен иметь возможность увидеть и изменить выбранный Runtime.
 
-If the runtime download fails, preserve the existing installation and show a recoverable error with the source and log details. Do not launch with an unverified or partially extracted runtime.
+Если загрузка собственной Java завершилась ошибкой, существующая установка должна остаться нетронутой. Лаунчер показывает понятную ошибку, источник загрузки и сведения из лога. Запуск с непроверенным или частично распакованным Runtime запрещён.
 
-## 5. Key design decisions
+## 5. Основные архитектурные решения
 
-1. Keep the GUI responsive. All network, installation, verification, and process operations run in worker tasks.
-2. Use a versioned manifest. Each managed file has a normalized relative path, size, SHA-256, source URL or source identifier, and file role.
-3. Preserve user data. Worlds, screenshots, user-created files, and user-controlled settings are not pack-managed. Stage and verify updates before activation; retain rollback metadata.
-4. Do not collect secrets. Offline profiles store a validated nickname and a locally generated stable offline UUID only. Never request or store Microsoft passwords or access tokens.
-5. Launch processes safely. Build a structured argument list and start Java without shell interpolation. Capture stdout, stderr, exit code, and log locations.
-6. Centralize downloads. Apply HTTPS policy, host allowlists where appropriate, timeouts, retry/backoff, size limits, and safe resume only when the server supports range requests.
-7. Resolve Java using the system-first policy in Section 4. Do not alter the user's system Java configuration.
-8. Respect third-party licenses. Do not redistribute mods or other files unless the applicable licenses and source permissions allow it. Support a user-provided source or authorized host where required.
+1. Графический интерфейс должен оставаться отзывчивым. Все сетевые операции, установка, проверка файлов и управление процессами выполняются в фоновых задачах.
+2. Используется версионируемый manifest. Для каждого управляемого файла указываются нормализованный относительный путь, размер, SHA-256, URL или идентификатор источника и роль файла.
+3. Пользовательские данные сохраняются. Миры, скриншоты, созданные пользователем файлы и пользовательские настройки не должны считаться файлами модпака. Обновления сначала подготавливаются и проверяются; метаданные для отката сохраняются.
+4. Секреты не собираются. Offline-профиль хранит проверенный игровой никнейм и локально созданный стабильный offline UUID. Пароли Microsoft и токены доступа не запрашиваются и не сохраняются.
+5. Безопасный запуск процессов. Аргументы формируются как структурированный список; Java запускается без подстановки командной строки через shell. Сохраняются stdout, stderr, код завершения и пути к логам.
+6. Загрузки централизованы. Применяются HTTPS, при необходимости список разрешённых хостов, тайм-ауты, повторные попытки с backoff, ограничения размера и безопасное продолжение загрузки только при поддержке Range-запросов сервером.
+7. Java выбирается по политике из раздела 4: системная Java в приоритете, собственная — как резерв. Системная конфигурация Java не изменяется.
+8. Соблюдаются лицензии сторонних компонентов. Моды и другие файлы распространяются только при наличии соответствующих разрешений. Если это необходимо, поддерживается источник, предоставленный пользователем, или авторизованный хостинг.
 
-## 6. Installation layout
+## 6. Структура установки
 
-Proposed separation of launcher files, runtime, game instance, and user data:
+Предлагается разделить файлы лаунчера, Runtime, игровой экземпляр и пользовательские данные:
 
-- Launcher application: under Program Files or a user-selected application directory.
-- Launcher state: per-user AppData for settings, profiles, logs, cache, and updater staging.
-- Managed Java: a dedicated launcher-managed runtime directory, separate from system Java.
-- Game instance: a user-selected directory, separate from launcher binaries and runtime files.
-- Pack-managed files: tracked in the manifest and installed under the game instance.
-- User data: worlds, screenshots, and other unmanaged user files preserved across updates.
+- Приложение лаунчера — Program Files или выбранный пользователем каталог.
+- Данные лаунчера — AppData текущего пользователя: настройки, профили, логи, кэш и временные файлы обновления.
+- Собственная Java — отдельный каталог Runtime, управляемый лаунчером и не связанный с системной Java.
+- Игровой экземпляр — выбранный пользователем каталог, отдельно от файлов приложения и Runtime.
+- Файлы модпака — отслеживаются через manifest и размещаются в игровом экземпляре.
+- Пользовательские данные — миры, скриншоты и другие неуправляемые файлы, которые сохраняются при обновлениях.
 
-Exact paths should be selected during implementation and documented. The launcher must handle paths containing spaces and non-ASCII characters.
+Точные пути будут выбраны и задокументированы во время реализации. Лаунчер должен корректно работать с путями, содержащими пробелы и нелатинские символы.
 
-## 7. Manifest model
+## 7. Модель manifest
 
-Each managed entry should include:
+Каждая управляемая запись должна содержать:
 
-- normalized relative path;
-- expected file size;
-- SHA-256 checksum;
-- download URL or source identifier;
-- managed role (Minecraft client, library, asset, Forge, mod, config, resource, runtime, etc.);
-- optional version and compatibility metadata.
+- нормализованный относительный путь;
+- ожидаемый размер файла;
+- контрольную сумму SHA-256;
+- URL загрузки или идентификатор источника;
+- роль файла (клиент Minecraft, библиотека, asset, Forge, мод, конфигурация, ресурс, Runtime и т. д.);
+- необязательные сведения о версии и совместимости.
 
-The manifest itself must be versioned, size-limited, validated before use, and rejected safely if malformed or unsupported. A manifest must never provide executable commands or arbitrary shell instructions.
+Сам manifest должен иметь версию, ограничение размера и строгую проверку структуры. Некорректный или неподдерживаемый manifest отклоняется безопасно. Manifest не должен содержать исполняемые команды или произвольные shell-инструкции.
 
-Runtime metadata should identify the supported Java major version, architecture, distribution/source, and integrity data. Secrets must not be embedded in the manifest.
+Метаданные Runtime должны указывать поддерживаемую основную версию Java, разрядность, дистрибутив/источник и данные для проверки целостности. Секреты нельзя помещать в manifest.
 
-## 8. Launch pipeline
+## 8. Последовательность запуска игры
 
-1. Load and validate launcher settings and the selected player profile.
-2. Verify the game instance and repair required missing or corrupted managed files.
-3. Resolve Java using the system-first policy; use the managed runtime only if no compatible system runtime is available or the user explicitly selects it.
-4. Resolve Minecraft 1.12.2 metadata, libraries, assets, and native libraries.
-5. Resolve the exact Forge build's metadata and legacy launch requirements.
-6. Build the classpath and JVM/game arguments from validated metadata and placeholders.
-7. Start the Java process in the game instance directory without invoking a shell.
-8. Capture process output, lifecycle, exit code, and relevant launcher/game log paths.
-9. Present a useful result and diagnostics if startup fails.
+1. Загрузить и проверить настройки лаунчера и выбранный профиль игрока.
+2. Проверить игровой экземпляр и восстановить необходимые отсутствующие или повреждённые управляемые файлы.
+3. Выбрать Java по политике системного приоритета; использовать собственный Runtime, только если совместимая системная Java отсутствует или пользователь явно выбрал собственную.
+4. Разрешить метаданные Minecraft 1.12.2, библиотеки, assets и native-библиотеки.
+5. Разрешить метаданные конкретной сборки Forge и требования её legacy-механизма запуска.
+6. Сформировать classpath, JVM-аргументы и игровые аргументы из проверенных метаданных и шаблонов.
+7. Запустить процесс Java в каталоге игрового экземпляра без вызова shell.
+8. Отслеживать процесс, его вывод, состояние, код завершения и пути к логам.
+9. При ошибке показать понятное описание и диагностические данные.
 
-## 9. Security and data integrity
+## 9. Безопасность и целостность данных
 
-- Reject absolute paths, traversal segments, drive prefixes, UNC paths, and unsafe archive entries.
-- Restrict downloads to HTTPS except explicitly justified test-only sources.
-- Validate manifest schema, size limits, URL hosts, file sizes, and checksums.
-- Never execute commands supplied by a manifest or modpack metadata.
-- Apply archive extraction limits and verify destination containment.
-- Stage downloads and verify files before making them active.
-- Do not overwrite or delete unmanaged user data.
-- Do not modify system Java settings or other global Windows configuration.
-- Avoid elevated permissions unless a clearly documented installation action requires them.
+- Отклонять абсолютные пути, сегменты обхода каталогов, префиксы дисков, UNC-пути и небезопасные записи архивов.
+- Использовать HTTPS для загрузок, кроме специально обоснованных тестовых источников.
+- Проверять схему manifest, ограничения размера, хосты URL, размеры файлов и контрольные суммы.
+- Никогда не выполнять команды из manifest или метаданных модпака.
+- Ограничивать распаковку архивов и проверять, что конечный путь находится внутри целевого каталога.
+- Сначала загружать файлы во временное место и проверять их, затем активировать.
+- Не перезаписывать и не удалять неуправляемые пользовательские данные.
+- Не изменять системные настройки Java и другие глобальные настройки Windows.
+- Не запрашивать права администратора, кроме явно описанных операций, которым они действительно необходимы.
 
-## 10. Risks and external dependencies
+## 10. Риски и внешние зависимости
 
-- Modpack source files, mod inventory, exact Forge build, and redistribution permissions are not yet available in the repository.
-- Forge 1.12.2 may require legacy-specific launch handling; validate against the actual installed Forge output.
-- Java compatibility must be confirmed with the real pack. A generic Java version check alone is insufficient.
-- Offline-mode servers may reject local offline profiles.
-- Native libraries and mod behavior can vary by Windows version and hardware.
-- Large downloads require disk-space estimation, interruption recovery, and robust diagnostics.
-- Qt/PyInstaller packaging needs clean-machine Windows verification.
+- Исходные файлы модпака, перечень модов, точная сборка Forge и разрешения на распространение пока не добавлены в репозиторий.
+- Forge для Minecraft 1.12.2 может требовать специальной логики запуска старого формата. Её необходимо проверить на реальных файлах установленного Forge.
+- Совместимость Java необходимо подтвердить на настоящем модпаке. Одной проверки номера версии недостаточно.
+- Серверы с online-mode могут отклонять локальные offline-профили.
+- Native-библиотеки и поведение модов могут зависеть от версии Windows и оборудования.
+- Большие загрузки требуют оценки свободного места, восстановления после прерывания и подробной диагностики.
+- Сборку Qt/PyInstaller необходимо проверить на чистой Windows-системе.
 
-## 11. Decisions still requiring real pack inputs
+## 11. Решения, для которых нужны реальные файлы модпака
 
-The following must not be guessed during implementation:
+При реализации нельзя угадывать следующие параметры:
 
-- exact Forge build and its launch metadata;
-- exact Java vendor/build requirements, if the pack has constraints beyond Java 8 x64;
-- mod/config/resource inventory and file ownership rules;
-- authorized download sources and redistribution permissions;
-- minimum disk space and final installation defaults.
+- точная сборка Forge и её метаданные запуска;
+- точные требования к поставщику и сборке Java, если они отличаются от базового Java 8 x64;
+- перечень модов, конфигураций, ресурсов и правила владения файлами;
+- разрешённые источники загрузки и права на распространение;
+- минимальный объём свободного места и окончательные настройки установки.
 
-The architecture can be implemented in layers before the modpack is supplied, but real Forge launch and full-pack compatibility cannot be claimed until tested with the actual files.
+Архитектуру можно реализовывать поэтапно до получения модпака, но заявлять о реальной совместимости с Forge и полной сборкой можно только после проверки на исходных файлах.
